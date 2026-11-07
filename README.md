@@ -45,9 +45,14 @@ node tests/smoke-client.mjs    # bundle smoke test
 
 `lib/client-ui.js` is a DSH client bundle (`window.__ModuleLoader__.load` envelope) and must stay committed.
 
-## Upstream sync
+## Upstream sync and automatic releases
 
-A daily GitHub Action merges `anysearch-team/anysearch-dsh` into this fork; conflicts (usually `package.json` and `pnpm-lock.yaml`) open a pull request instead of pushing.
+A daily GitHub Action merges `anysearch-team/anysearch-dsh` into this fork:
+
+- **no conflicts**: it pushes the merge; when upstream has just tagged a release it also bumps the version to `<upstream-version>-fork.1`, commits, tags, and publishes the release (`dsh-anysearch-ev-<version>.tgz`);
+- **conflicts**: it opens an issue and leaves the version and release alone (conflicts are usually `package.json` and `pnpm-lock.yaml`).
+
+Versions mirror upstream: upstream `0.1.9` becomes `0.1.9-fork.1` here. Manual tags still trigger `release.yml`.
 
 ## License
 

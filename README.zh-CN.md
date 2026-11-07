@@ -77,14 +77,14 @@ node tests/smoke-client.mjs   # 客户端 bundle 烟雾测试
 
 客户端产物 `lib/client-ui.js` 是 DSH 的模块加载格式（`window.__ModuleLoader__.load`），由 `scripts/build-client.mjs` 生成，**需要提交进仓库**。
 
-## 跟随上游
+## 跟随上游 / 自动发版
 
-本仓库通过 GitHub Actions 每天从上游 `anysearch-team/anysearch-dsh` 合并一次：
+GitHub Actions 每天 03:17 UTC 从上游 `anysearch-team/anysearch-dsh` 合并一次：
 
-- 无冲突：直接合并并推送；
-- 有冲突：自动开一个 PR，人工处理（通常只涉及 `package.json` 与 `pnpm-lock.yaml`）。
+- **无冲突**：直接合并并推送；如果上游刚发了新 tag，会自动把版本改成 `<上游版本>-fork.1`、提交、打 tag 并创建 Release（产物是 `dsh-anysearch-ev-<版本>.tgz`）；
+- **有冲突**：只开 issue，不动版本、不发版，等人工处理（通常只涉及 `package.json` 与 `pnpm-lock.yaml`）。
 
-上游是稳定服务，更新频率很低；v0.1.8 起上游已把 DSH 依赖范围放宽为 `*`，不再因 DSH 版本被拒装。
+版本号始终跟上游同一行：上游 `0.1.9` → 本仓库 `0.1.9-fork.1`。也可以手动打 tag 发版，走 `release.yml`。
 
 ## License
 

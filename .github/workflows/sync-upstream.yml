@@ -22,6 +22,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: pnpm
+
       - name: Configure git
         run: |
           git config user.name "github-actions[bot]"
@@ -31,7 +40,7 @@ jobs:
         id: merge
         run: |
           git remote add upstream https://github.com/anysearch-team/anysearch-dsh.git || true
-          git fetch upstream main
+          git fetch upstream main --tags --force
           if git merge upstream/main --no-edit; then
             echo "conflict=0" >> "$GITHUB_OUTPUT"
           else
@@ -42,14 +51,73 @@ jobs:
       - name: Refresh lockfile
         if: steps.merge.outputs.conflict == '0'
         run: |
-          corepack enable
           pnpm install --lockfile-only
-          git add pnpm-lock.yaml package.json || true
+          git add pnpm-lock.yaml package.json
           git commit -m "chore: refresh lockfile after upstream sync" || true
 
-      - name: Push clean merge
+      # A new upstream tag that is already merged into HEAD means a new upstream
+      # release. Follow it as <upstream-version>-fork.1 so installs track the
+      # same line as the original plugin.
+      - name: Detect new upstream release
+        id: release
+        if: steps.merge.outputs.conflict == '0'
+        run: |
+          set -euo pipefail
+          TAG=$(git tag --list 'v*' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1 || true)
+          if [ -z "${TAG:-}" ]; then
+            echo "tag=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if ! git merge-base --is-ancestor "$TAG" HEAD; then
+            echo "tag=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          VERSION="${TAG#v}"
+          TARGET="${VERSION}-fork.1"
+          CURRENT=$(node -p "require('./package.json').version")
+          if [ "$CURRENT" = "$TARGET" ]; then
+            echo "tag=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "tag=v$TARGET" >> "$GITHUB_OUTPUT"
+          echo "version=$TARGET" >> "$GITHUB_OUTPUT"
+
+      - name: Bump fork version
+        if: steps.release.outputs.tag != ''
+        run: |
+          set -euo pipefail
+          node .github/scripts/bump-fork-version.mjs "${{ steps.release.outputs.version }}"
+          git add package.json src/version.ts lib/version.js lib/version.d.ts
+          git commit -m "release: ${{ steps.release.outputs.version }}"
+          git tag -a "${{ steps.release.outputs.tag }}" -m "dsh-anysearch-ev ${{ steps.release.outputs.version }}"
+
+      - name: Install dependencies
+        if: steps.merge.outputs.conflict == '0'
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Verify committed build
+        if: steps.merge.outputs.conflict == '0'
+        run: pnpm run check:dist
+
+      - name: Package
+        if: steps.release.outputs.tag != ''
+        run: npm pack
+
+      - name: Push synced main
         if: steps.merge.outputs.conflict == '0'
         run: git push origin HEAD:main
+
+      - name: Push release tag
+        if: steps.release.outputs.tag != ''
+        run: git push origin "${{ steps.release.outputs.tag }}"
+
+      - name: Create GitHub release
+        if: steps.release.outputs.tag != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release.outputs.tag }}
+          files: dsh-anysearch-ev-*.tgz
+          generate_release_notes: true
 
       - name: Report merge conflict
         if: steps.merge.outputs.conflict == '1'
@@ -57,11 +125,11 @@ jobs:
         with:
           script: |
             const body = [
-              'The scheduled upstream sync hit merge conflicts, so nothing was pushed.',
+              'The scheduled upstream sync hit merge conflicts, so nothing was pushed and no release was created.',
               '',
               'Resolve locally:',
               '```bash',
-              'git fetch https://github.com/anysearch-team/anysearch-dsh.git main',
+              'git fetch https://github.com/anysearch-team/anysearch-dsh.git main --tags',
               'git merge FETCH_HEAD',
               '# keep the fork fields in package.json (name, version, dsh.client, esbuild devDependency)',
               'pnpm install --lockfile-only',
