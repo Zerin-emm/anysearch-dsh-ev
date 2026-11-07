@@ -21,8 +21,9 @@ async function files(directory, prefix = '') {
 try {
   execFileSync(process.execPath, [path.join(root, 'node_modules/typescript/bin/tsc'),
     '-p', path.join(root, 'tsconfig.json'), '--outDir', scratch], { cwd: root, stdio: 'inherit' })
-  const expected = await files(scratch)
-  const actual = await files(path.join(root, 'lib'))
+  // lib/client-ui.js is produced by scripts/build-client.mjs (esbuild), not tsc.
+  const expected = (await files(scratch)).filter(name => name !== 'client-ui.js')
+  const actual = (await files(path.join(root, 'lib'))).filter(name => name !== 'client-ui.js')
   assert.deepEqual(actual, expected, 'lib file list is stale; run pnpm run build and include lib in the change')
   for (const name of expected) {
     const normalize = text => text.replaceAll('\r\n', '\n')

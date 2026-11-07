@@ -55,12 +55,12 @@ for (const [channel, specifier] of cases) {
     const output = run(process.execPath, [cli, 'plugin', '--profile', 'web', 'add', specifier], scratch, profileEnv)
     await writeFile(path.join(home, 'install.log'), output)
     const profileRoot = path.join(home, 'profiles/web')
-    const installed = JSON.parse(await readFile(path.join(profileRoot, 'node_modules/@anysearch/anysearch-dsh/package.json'), 'utf8'))
+    const installed = JSON.parse(await readFile(path.join(profileRoot, 'node_modules/dsh-anysearch-ev/package.json'), 'utf8'))
     assert.equal(installed.version, packed.version)
-    const entry = await readFile(path.join(profileRoot, 'node_modules/@anysearch/anysearch-dsh', installed.main), 'utf8')
+    const entry = await readFile(path.join(profileRoot, 'node_modules/dsh-anysearch-ev', installed.main), 'utf8')
     assert.ok(entry.includes('registerSearchProvider'), 'Installed JS entry is missing')
     const config = run(process.execPath, [cli, '--profile', 'web', '--dump-config'], scratch, profileEnv)
-    for (const pattern of [/searchProvider: anysearch/, /fetchProvider: anysearch/, /@anysearch\/anysearch-dsh/]) {
+    for (const pattern of [/searchProvider: anysearch/, /fetchProvider: anysearch/, /dsh-anysearch-ev/]) {
       assert.match(config, pattern)
     }
     await writeFile(path.join(home, 'composed-config.yml'), config)

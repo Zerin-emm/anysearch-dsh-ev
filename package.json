@@ -1,7 +1,7 @@
 {
-  "name": "@anysearch/anysearch-dsh",
-  "version": "0.1.8",
-  "description": "AnySearch web search and fetch providers plus advanced tools for DeepSeek Harness",
+  "name": "dsh-anysearch-ev",
+  "version": "0.1.8-fork.1",
+  "description": "AnySearch web search and fetch providers for DeepSeek Harness, with an in-UI API key settings card (fork of @anysearch/anysearch-dsh)",
   "keywords": [
     "anysearch",
     "deepseek-harness",
@@ -9,16 +9,16 @@
     "web-search",
     "web-fetch"
   ],
-  "homepage": "https://github.com/anysearch-team/anysearch-dsh#readme",
+  "homepage": "https://github.com/Zerin-emm/anysearch-dsh-ev#readme",
   "bugs": {
-    "url": "https://github.com/anysearch-team/anysearch-dsh/issues"
+    "url": "https://github.com/Zerin-emm/anysearch-dsh-ev/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/anysearch-team/anysearch-dsh.git"
+    "url": "git+https://github.com/Zerin-emm/anysearch-dsh-ev.git"
   },
   "license": "MIT",
-  "author": "AnySearch Team",
+  "author": "Zerin-emm (fork of AnySearch Team)",
   "type": "module",
   "sideEffects": false,
   "main": "lib/index.js",
@@ -28,6 +28,9 @@
       "types": "./lib/index.d.ts",
       "import": "./lib/index.js",
       "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client-ui.js"
     },
     "./package.json": "./package.json"
   },
@@ -42,7 +45,8 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && node scripts/build-client.mjs",
+    "build:client": "node scripts/build-client.mjs",
     "check": "pnpm run check:dist && tsc -p tsconfig.test.json && vitest run && node scripts/check-package.mjs",
     "check:package": "pnpm run check:dist && node scripts/check-package.mjs",
     "test": "vitest run",
@@ -62,7 +66,16 @@
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
-    }
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-settings",
+        "@deepseek-ai/dsh-client-ui-plugin-manager",
+        "@deepseek-ai/dsh-api-remotes"
+      ],
+      "platform": "web"
+    },
+    "manifestVersion": 1
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": ">=4.0.1-rc.1 <5 || 4.0.5-alpha.1",
@@ -84,6 +97,7 @@
     "@deepseek-ai/dsh-tools": "0.2.1-alpha.1",
     "@deepseek-ai/dsh-web": "0.2.1-alpha.1",
     "@types/node": "^22.20.0",
+    "esbuild": "^0.28.2",
     "typescript": "^6.0.3",
     "vitest": "^4.1.8"
   }

@@ -1,3 +1,7 @@
+allowBuilds:
+  # esbuild ships a platform binary through a postinstall step; the client
+  # bundle build (scripts/build-client.mjs) needs it.
+  esbuild: true
 minimumReleaseAgeExclude:
   # Retained reviewed foundation versions still present in pnpm-lock.yaml.
   - '@deepseek-ai/cosmokit@1.8.2'

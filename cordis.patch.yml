@@ -5,6 +5,6 @@
 
 - insert:
     - id: web-search-anysearch
-      name: '@anysearch/anysearch-dsh'
+      name: 'dsh-anysearch-ev'
       config:
         apiKeyEnv: ANYSEARCH_API_KEY

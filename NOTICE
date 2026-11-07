@@ -1,0 +1,17 @@
+# NOTICE
+
+This repository is a fork of **@anysearch/anysearch-dsh** (https://github.com/anysearch-team/anysearch-dsh),
+licensed under the MIT License. The original copyright notice is preserved in LICENSE.
+
+Changes made in this fork:
+
+- package renamed to `dsh-anysearch-ev` and versioned as `<upstream>-fork.<n>`;
+- a browser-half settings card (`src/client/`, `lib/client.js`) was added to configure the
+  `ANYSEARCH_API_KEY` credential reference from the DSH Plugins page;
+- `dsh.client` / `exports["./client"]` / `manifestVersion` declarations and a client build
+  (`scripts/build-client.mjs`) were added;
+- `cordis.patch.yml` now points at this package's name;
+- CI scripts that referenced the upstream package name were updated accordingly.
+
+The host half (search/fetch providers, tools, validation, tests) is upstream code and is kept
+in sync with the original repository through a scheduled GitHub Action.
