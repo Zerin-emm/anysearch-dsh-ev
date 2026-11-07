@@ -31,7 +31,7 @@ for (const lifecycle of ['preinstall', 'install', 'postinstall', 'prepare', 'pre
 for (const entry of [packageInfo.main, packageInfo.types, packageInfo.dsh.bundle.patch.replace(/^\.\//, '')]) {
   assert.ok(packagedFiles.has(entry), `Package entry is missing: ${entry}`)
 }
-const readmes = ['README.md', 'README.zh-CN.md']
+const readmes = ['README.md', 'README.en.md']
 const localImages = new Set()
 
 for (const readme of readmes) {
