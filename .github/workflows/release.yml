@@ -28,8 +28,15 @@ jobs:
       - name: Install
         run: pnpm install --no-frozen-lockfile
 
-      - name: Build (host + client)
-        run: pnpm run build
+      # The repository ships the compiled host half and the client bundle, so a
+      # release packs exactly what Git installs consume. `check:dist` recompiles
+      # into a scratch directory and proves the committed output still matches
+      # the TypeScript sources; it never touches `lib/`.
+      - name: Verify committed build
+        run: pnpm run check:dist
+
+      - name: Smoke test client bundle
+        run: node tests/smoke-client.mjs
 
       - name: Package
         run: pnpm pack
