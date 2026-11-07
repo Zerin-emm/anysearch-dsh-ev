@@ -91,11 +91,14 @@ const ctx = {
 plugin.apply(ctx)
 
 if (slot === null) throw new Error('card was not registered')
-if (slot.config.name !== 'plugins.item') throw new Error('card registered outside plugins.item')
-if (slot.config.id !== 'anysearch-key') throw new Error('unexpected card id')
+if (slot.config.name !== 'plugins.bundle.config') {
+  throw new Error(`card registered outside plugins.bundle.config: ${slot.config.name}`)
+}
+if (slot.config.key !== 'dsh-anysearch-ev') throw new Error(`unexpected slot key: ${slot.config.key}`)
 
-const element = slot.component()
+const element = slot.component({ view: 'page' })
 if (element === null || typeof element !== 'object') throw new Error('card did not render')
+if (slot.component({ view: 'summary' }) !== null) throw new Error('summary view must render nothing')
 
 await new Promise((resolve) => setTimeout(resolve, 20))
 if (!calls.some(([kind, ref]) => kind === 'describe' && ref === 'ANYSEARCH_API_KEY')) {

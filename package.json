@@ -1,6 +1,6 @@
 {
   "name": "dsh-anysearch-ev",
-  "version": "0.1.8-fork.1",
+  "version": "0.1.8-fork.2",
   "description": "AnySearch web search and fetch providers for DeepSeek Harness, with an in-UI API key settings card (fork of @anysearch/anysearch-dsh)",
   "keywords": [
     "anysearch",

@@ -129,8 +129,8 @@ const styles = {
   message: { fontSize: '12px', opacity: 0.75 },
 }
 
-/** The settings card mounted into the Plugins page's `plugins.item` slot. */
-function KeyCard() {
+/** The settings card mounted into the bundle page's `plugins.bundle.config` slot. */
+function KeyCard(props) {
   const [, force] = useReducer((n) => n + 1, 0)
   const [draft, setDraft] = useState('')
 
@@ -142,6 +142,10 @@ function KeyCard() {
       listeners.delete(listener)
     }
   }, [])
+
+  // The bundle page asks for the `page` view; anything else is another slot's
+  // business (the summary line on plugin cards).
+  if (props?.view !== 'page') return null
 
   const configured = state.configured
   const disabled = state.writable !== true || state.saving === true
@@ -199,21 +203,26 @@ function KeyCard() {
 /** Required services (cordis fiber inject). */
 export const inject = ['slots', 'remote', 'remote.credentials']
 
+/** Package name the bundle-config slot is keyed by. */
+const PACKAGE_NAME = 'dsh-anysearch-ev'
+
 /**
- * Mount the settings card.
+ * Mount the settings card on this bundle's own page.
+ *
+ * The Plugins page renders `plugins.bundle.config` on a bundle's page, keyed by
+ * the bundle's package name; a bundle's configuration belongs there rather than
+ * in `plugins.item`, which the official settings pages occupy.
  * @param ctx - the browser plugin context.
  */
 export function apply(ctx) {
   clientCtx = ctx
   ctx.effect(
     () =>
-      ctx.slots.inject('plugins.item', () =>
+      ctx.slots.inject('plugins.bundle.config', () =>
         ctx.slots.register(
           {
-            name: 'plugins.item',
-            id: 'anysearch-key',
-            order: 30,
-            label: () => 'AnySearch API Key',
+            name: 'plugins.bundle.config',
+            key: PACKAGE_NAME,
           },
           KeyCard,
         ),
